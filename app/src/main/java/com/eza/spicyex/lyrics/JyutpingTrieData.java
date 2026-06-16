@@ -1,0 +1,50 @@
+package com.eza.spicyex.lyrics;
+
+final class JyutpingTrieData {
+    private JyutpingTrieData() {}
+
+    static String data() {
+        return ""
+                + "上堂=soeng5 tong4\n"
+                + "終於=zung1 jyu1\n"
+                + "講到=gong2 dou3\n"
+                + "分數=fan1 sou3\n"
+                + "好學生=hou2 hok6 saang1\n"
+                + "好學=hou3 hok6\n"
+                + "學生=hok6 saang1\n"
+                + "老世=lou5 sai3\n"
+                + "要求=jiu1 kau4\n"
+                + "等陣=dang2 zan6\n"
+                + "開會=hoi1 wui2\n"
+                + "剩低=zing6 dai1\n"
+                + "搞掂=gaau2 dim6\n"
+                + "嘅嘢=ge3 je5\n"
+                + "㗎喇=gaa3 laa3\n"
+                + "香港=hoeng1 gong2\n"
+                + "廣東話=gwong2 dung1 waa2\n"
+                + "冇問題=mou5 man6 tai4\n"
+                + "唔知道=m4 zi1 dou3\n"
+                + "鍾意=zung1 ji3\n"
+                + "點解=dim2 gaai2\n"
+                + "今日=gam1 jat6\n"
+                + "聽日=ting1 jat6\n"
+                + "琴日=kam4 jat6\n"
+                + "乜嘢=mat1 je5\n"
+                + "係咪=hai6 mai6\n"
+                + "唔係=m4 hai6\n"
+                + "可以=ho2 ji5\n"
+                + "如果=jyu4 gwo2\n"
+                + "因為=jan1 wai6\n"
+                + "所以=so2 ji5\n"
+                + "一齊=jat1 cai4\n"
+                + "返嚟=faan1 lai4\n"
+                + "出去=ceot1 heoi3\n"
+                + "入嚟=jap6 lai4\n"
+                + "屋企=uk1 kei2\n"
+                + "自己=zi6 gei2\n"
+                + "大家=daai6 gaa1\n"
+                + "我哋=ngo5 dei6\n"
+                + "你哋=nei5 dei6\n"
+                + "佢哋=keoi5 dei6\n";
+    }
+}
