@@ -15,9 +15,9 @@ Spicy Lyrics for Spotify, as an Xposed/LSPosed module.
 - In-Spotify settings; works even when Spotify itself has no lyrics.
 
 ## Install
-APK from [Releases](../../releases). Spicy EX is a module that runs inside Spotify — not an app you open.
+APK from [Releases](../../releases). 
 
-**Rooted (LSPosed):** install the APK → enable in LSPosed, scope to Spotify → force-stop Spotify.
+**Rooted (LSPosed):** install, enable, scope to Spotify — you know the drill.
 
 **Non-rooted (LSPatch):**
 Spotify enforces Play Integrity during login. Bypass this using the **Downgrade-Login-Upgrade** method:
@@ -32,7 +32,7 @@ Spotify enforces Play Integrity during login. Bypass this using the **Downgrade-
 > Tested on Spotify **v9.1.28.2252**.
 
 > [!WARNING]
-> May conflicts with ReVanced / modified Spotify or old Spotify Plus — use a clean Spotify.
+> May conflicts with ReVanced / modified Spotify or old Spotify Plus 
 
 ## Build
 JDK 21, Android SDK.
@@ -48,5 +48,4 @@ JDK 21, Android SDK.
 - [boidushya/better-lyrics](https://github.com/boidushya/better-lyrics) (+ kawarp background)
 
 ## License
-[AGPL-3.0](LICENSE). Portions are derived from the AGPL-3.0 projects above (Spicy Lyrics,
-better-lyrics, kawarp), so the project as a whole is AGPL-3.0. See [NOTICE](NOTICE) for attribution.
+[AGPL-3.0](LICENSE). See [NOTICE](NOTICE) for attribution.
