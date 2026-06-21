@@ -13,6 +13,7 @@ Spicy Lyrics for Spotify, as an Xposed/LSPosed module.
 - Transliteration: Japanese (furigana / romaji / both), Chinese (pinyin / jyutping), Korean / Cyrillic / Greek — optionally per-word.
 - Google Translate.
 - In-Spotify settings; works even when Spotify itself has no lyrics.
+- [Read more](FEATURES_USER.md)
 
 ## Install
 APK from [Releases](../../releases). 
