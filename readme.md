@@ -1,7 +1,8 @@
 <div align="center">
 
 # Spicy EX
-Spicy Lyrics for Spotify, as an Xposed/LSPosed module.
+Spicy Lyrics for Spotify, as an Xposed/LSPosed module.<br>
+For the desktop version, check out [spicy-lyrics](https://github.com/amarinne/spicy-lyrics).
 
 <img src="assets/demo.gif" width="320" alt="Spicy EX lyrics demo">
 
