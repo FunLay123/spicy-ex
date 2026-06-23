@@ -1,6 +1,7 @@
 package com.eza.spicyex.lyrics;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 
@@ -45,5 +46,13 @@ public class ChineseRomanizerTest {
         String noTones = SpicyJapaneseChineseProcessor.romanizeChineseLine("你好", "jyutping", false);
         assertEquals(withTones.replaceAll("[1-6]", ""), noTones);   // off strips the trailing tone digits
         org.junit.Assert.assertNotEquals(withTones, noTones);       // and they differ (tones were present)
+    }
+
+    @Test
+    public void chineseLinesAreNotDisplayedAsJapanese() {
+        AppliedLine line = new AppliedLine();
+        line.text = "中国";
+        line.romanizedText = "zhong guo";
+        assertFalse(LyricsDisplayMode.isJapaneseLine(line));
     }
 }

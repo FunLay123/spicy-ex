@@ -2,6 +2,7 @@ package com.eza.spicyex.lyrics;
 
 import android.content.Context;
 
+import com.eza.spicyex.FeatureAvailability;
 import com.eza.spicyex.Settings;
 import com.eza.spicyex.SpotifyPlusConfig;
 import static com.eza.spicyex.lyrics.LyricUtils.isBlank;
@@ -44,17 +45,19 @@ public final class LyricsDocumentProcessor {
         String targetLang = config != null ? config.get(Settings.TRANSLATION_TARGET) : "en";
         for (LyricsLine line : doc.lines) {
             if (line == null || line.interlude || isBlank(line.text)) continue;
-            if (SpicyTextDetection.hasRomanizableScript(line.text)) {
+            if (FeatureAvailability.transliterationAvailable() && SpicyTextDetection.hasRomanizableScript(line.text)) {
                 String cachedRomanized = LyricCaches.getProcessingValue(context, processingVersion,
                         LyricCaches.romanizationKey(doc.trackId, doc.language, line.text));
                 if (!isBlank(cachedRomanized) && !cachedRomanized.equals(line.text) && !SpicyTextDetection.hasRomanizableScript(cachedRomanized)) {
                     line.romanizedText = cachedRomanized;
                 }
             }
-            String cachedTranslated = LyricCaches.getProcessingValue(context, processingVersion,
-                    LyricCaches.translationKey(doc.trackId, doc.language, targetLang, line.text));
-            if (isBlank(line.translatedText) && !isBlank(cachedTranslated) && !GoogleEnhancer.sameText(cachedTranslated, line.text)) {
-                line.translatedText = cachedTranslated;
+            if (FeatureAvailability.translationAvailable()) {
+                String cachedTranslated = LyricCaches.getProcessingValue(context, processingVersion,
+                        LyricCaches.translationKey(doc.trackId, doc.language, targetLang, line.text));
+                if (isBlank(line.translatedText) && !isBlank(cachedTranslated) && !GoogleEnhancer.sameText(cachedTranslated, line.text)) {
+                    line.translatedText = cachedTranslated;
+                }
             }
         }
     }
@@ -63,17 +66,18 @@ public final class LyricsDocumentProcessor {
         if (doc == null) return;
         SpotifyPlusConfig config = context != null ? SpotifyPlusConfig.from(context) : null;
         String targetLang = config != null ? config.get(Settings.TRANSLATION_TARGET) : "en";
-        boolean translationEnabled = config == null || config.getBoolean(
+        boolean translationEnabled = FeatureAvailability.translationAvailable()
+                && (config == null || config.getBoolean(
                 Settings.TRANSLATION_ENABLED.key,
                 !"disabled".equalsIgnoreCase(config.get(Settings.TRANSLATION_BACKEND))
-        );
+        ));
 
         String fullText = collectText(doc);
         SpicyProcessing.ProcessingFlags flags = SpicyProcessing.flagsFor(fullText, targetLang);
         doc.processingVersion = flags.processingVersion;
-        doc.processingPending = flags.processingPending;
-        doc.romanizationPending = flags.romanizationPending;
+        doc.romanizationPending = FeatureAvailability.transliterationAvailable() && flags.romanizationPending;
         doc.translationPending = translationEnabled && flags.translationPending;
+        doc.processingPending = doc.romanizationPending || doc.translationPending;
         doc.detectedScripts.clear();
         doc.detectedScripts.addAll(SpicyTextDetection.detectPresentScripts(fullText, doc.language, ""));
         doc.detectedChinese = doc.detectedScripts.contains(SpicyTextDetection.Script.CHINESE);

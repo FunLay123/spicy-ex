@@ -913,7 +913,7 @@ final class NativeSpicyShellViewImpl extends FrameLayout {
     }
 
     private boolean isJapaneseLine(AppliedLine line) {
-        return hasJapaneseReading(line) || (line != null && SpicyJapaneseChineseProcessor.canRomanizeJapanese(line.text));
+        return hasJapaneseReading(line) || (line != null && SpicyTextDetection.hasKana(line.text));
     }
 
     private void refreshSecondaryRows(String message) {
@@ -1124,7 +1124,7 @@ final class NativeSpicyShellViewImpl extends FrameLayout {
         // Japanese: the line-level token-aligned syllable romanization is authoritative. A blank
         // here is an INTENTIONAL continuation syllable (the token's reading was emitted at its first
         // syllable); re-romanizing the bare segment double-prints it ("tachimukai mukai kai").
-        if (line != null && SpicyJapaneseChineseProcessor.canRomanizeJapanese(safe(line.text))) return "";
+        if (isJapaneseLine(line)) return "";
         LyricsLine source = line == null ? null : line.sourceLine;
         String local = LyricsLocalRomanizer.romanizeText(romanizationOptions(), document, seg.text, fullText, source == null ? "" : source.chineseMode);
         if (!isBlank(local) && !local.equals(seg.text) && !SpicyTextDetection.hasRomanizableScript(local)) {

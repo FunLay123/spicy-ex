@@ -21,7 +21,7 @@ import androidx.annotation.RequiresApi;
  * Album-art ambient background ported from kawarp (`@kawarp/core`): a slow GPU domain-warp over a
  * heavily-softened cover, with a saturation lift and a touch of dithering to kill banding. Uses an
  * AGSL {@link RuntimeShader} (Android 13+/API 33), so the controller only attaches this on capable
- * devices and falls back to {@link AnimatedBackgroundView} elsewhere.
+ * devices. Older devices skip animated background instead of running the retired CPU blob fallback.
  *
  * <p>Rather than running kawarp's 8 Kawase blur passes per frame on mobile, the cover is downsampled
  * once to a tiny bitmap and bilinearly upscaled by the shader — visually equivalent to a strong blur

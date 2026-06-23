@@ -29,10 +29,18 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Build signed Release APK
+      - name: Build signed Release APKs
         env:
           SIGNING_KEYSTORE_FILE: ${{ github.workspace }}/spicyex-release.jks
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleLiteRelease assembleFullRelease
+
+      - name: Upload release APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: spicy-ex-release-apks
+          path: |
+            app/build/outputs/apk/lite/release/*.apk
+            app/build/outputs/apk/full/release/*.apk

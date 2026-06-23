@@ -105,6 +105,10 @@ public final class SpicyTextDetection {
         return containsCodePoint(text, SpicyTextDetection::isCjkIdeograph);
     }
 
+    public static boolean hasKana(String text) {
+        return containsCodePoint(text, SpicyTextDetection::isKana);
+    }
+
     private static void addIfPresent(List<Script> out, List<Script> present, Script script) {
         if (present.contains(script)) out.add(script);
     }

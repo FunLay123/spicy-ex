@@ -12,7 +12,6 @@ import com.eza.spicyex.Settings;
 import com.eza.spicyex.SpotifyPlusConfig;
 import com.eza.spicyex.SpotifyTrack;
 import com.eza.spicyex.beautifullyrics.entities.AmbientBackgroundLayer;
-import com.eza.spicyex.beautifullyrics.entities.AnimatedBackgroundView;
 import com.eza.spicyex.beautifullyrics.entities.KawarpBackgroundView;
 
 import java.io.IOException;
@@ -79,21 +78,9 @@ public final class LyricsAmbientController {
     public void applySettings(boolean enabled, boolean forceDark) {
         if (animatedParent != null && enabled && animatedBackground == null) {
             createAnimatedLayer(animatedParent, forceDark);
-        } else if (animatedBackground != null && forceDark != animatedForceDark) {
-            if (animatedBackground instanceof KawarpBackgroundView) {
-                ((KawarpBackgroundView) animatedBackground).setForceDark(forceDark);
-                animatedForceDark = forceDark;
-            } else {
-                ViewGroup parent = animatedBackground.asView().getParent() instanceof ViewGroup
-                        ? (ViewGroup) animatedBackground.asView().getParent()
-                        : animatedParent;
-                if (parent instanceof FrameLayout) {
-                    animatedBackground.pauseRendering();
-                    parent.removeView(animatedBackground.asView());
-                    animatedBackground = null;
-                    createAnimatedLayer((FrameLayout) parent, forceDark);
-                }
-            }
+        } else if (animatedBackground instanceof KawarpBackgroundView && forceDark != animatedForceDark) {
+            ((KawarpBackgroundView) animatedBackground).setForceDark(forceDark);
+            animatedForceDark = forceDark;
         }
         if (animatedBackground == null) return; // not attached this session — applies on next open
         if (enabled) {
@@ -113,17 +100,15 @@ public final class LyricsAmbientController {
 
     private void createAnimatedLayer(FrameLayout parent, boolean forceDark) {
         if (parent == null) return;
-        // kawarp domain-warp shader needs AGSL (Android 13+); fall back to the CPU blob renderer
-        // on older devices or if the RuntimeShader fails to compile.
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            try {
-                animatedBackground = new KawarpBackgroundView(activity, forceDark);
-            } catch (Throwable t) {
-                XposedBridge.log(TAG + " kawarp shader unavailable, falling back: " + t);
-                animatedBackground = new AnimatedBackgroundView(activity, null, parent);
-            }
-        } else {
-            animatedBackground = new AnimatedBackgroundView(activity, null, parent);
+        // Kawarp needs AGSL (Android 13+). Older devices skip animated background instead of
+        // running the retired CPU blob fallback.
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) return;
+        try {
+            animatedBackground = new KawarpBackgroundView(activity, forceDark);
+        } catch (Throwable t) {
+            XposedBridge.log(TAG + " kawarp shader unavailable; animated background disabled: " + t);
+            animatedBackground = null;
+            return;
         }
         animatedForceDark = forceDark;
         appliedArtImageId = "";

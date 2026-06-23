@@ -9,7 +9,7 @@ public final class LyricsDisplayMode {
         return line != null
                 && ((line.japaneseReading != null && line.japaneseReading.furigana != null
                 && !line.japaneseReading.furigana.isEmpty())
-                || SpicyJapaneseChineseProcessor.canRomanizeJapanese(line.text));
+                || SpicyTextDetection.hasKana(line.text));
     }
 
     public static boolean showJapaneseFurigana(AppliedLine line, boolean showRomanization, String japaneseReadingMode) {

@@ -18,7 +18,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.eza.spicyex.beautifullyrics.entities.LyricsResponseCache;
-import com.eza.spicyex.beautifullyrics.entities.LyricsTranslator;
+import com.eza.spicyex.lyrics.LyricCaches;
 
 /**
  * The Spicy EX settings UI as a single floating rounded card (centered modal), built from the
@@ -121,7 +121,7 @@ public final class SettingsPanel {
 
     private boolean shouldRender(Settings.Setting<?> setting) {
         if (setting == Settings.TRANSLATION_TARGET || setting == Settings.TRANSLATION_BRIGHTNESS) {
-            return store.get(Settings.TRANSLATION_ENABLED);
+            return FeatureAvailability.translationAvailable() && store.get(Settings.TRANSLATION_ENABLED);
         }
         if (setting == Settings.ALIGNED_PER_WORD_ROMAJI
                 || setting == Settings.JAPANESE_READING_MODE
@@ -131,7 +131,7 @@ public final class SettingsPanel {
                 || setting == Settings.CYRILLIC_MODE
                 || setting == Settings.CYRILLIC_KEEP_SIGNS
                 || setting == Settings.LIVE_CARD_SHOW_TRANSLITERATION) {
-            return store.get(Settings.TRANSLITERATION_ENABLED);
+            return FeatureAvailability.transliterationAvailable() && store.get(Settings.TRANSLITERATION_ENABLED);
         }
         if (setting == Settings.FORCE_DARK_BACKGROUND) {
             return store.get(Settings.ENABLE_BACKGROUND);
@@ -149,9 +149,14 @@ public final class SettingsPanel {
                 || setting == Settings.ANIMATION_STYLE;
     }
 
+    private boolean unavailable(Settings.Setting<?> setting) {
+        return (setting == Settings.TRANSLITERATION_ENABLED && !FeatureAvailability.transliterationAvailable())
+                || (setting == Settings.TRANSLATION_ENABLED && !FeatureAvailability.translationAvailable());
+    }
+
     private void renderActions(LinearLayout content) {
         sectionLabel(content, "Actions");
-        actionRow(content, "Clear translation cache", v -> LyricsTranslator.clearCache(context));
+        actionRow(content, "Clear translation cache", v -> LyricCaches.clearGoogle(context));
         actionRow(content, "Clear lyrics response cache", v -> LyricsResponseCache.clear(context));
     }
 
@@ -206,16 +211,22 @@ public final class SettingsPanel {
 
     private void switchRow(LinearLayout content, Settings.BooleanSetting setting) {
         LinearLayout row = newRow(content);
-        titleColumn(row, setting.label, null);
+        boolean unavailable = unavailable(setting);
+        titleColumn(row, setting.label, unavailable ? FeatureAvailability.unavailableSummary() : null);
         GlossyToggle toggle = new GlossyToggle(context);
         toggle.setAccent(COL_ACCENT);
-        toggle.setChecked(store.get(setting), false);
-        toggle.setOnChangeListener(() -> {
-            store.put(setting, toggle.isChecked());
-            if (shouldRebuildAfterChange(setting)) rebuildSections();
-        });
+        toggle.setChecked(!unavailable && store.get(setting), false);
+        toggle.setEnabled(!unavailable);
+        row.setEnabled(!unavailable);
+        row.setAlpha(unavailable ? 0.48f : 1f);
+        if (!unavailable) {
+            toggle.setOnChangeListener(() -> {
+                store.put(setting, toggle.isChecked());
+                if (shouldRebuildAfterChange(setting)) rebuildSections();
+            });
+            row.setOnClickListener(v -> toggle.setChecked(!toggle.isChecked(), true));
+        }
         row.addView(toggle);
-        row.setOnClickListener(v -> toggle.setChecked(!toggle.isChecked(), true));
     }
 
     private void selectorRow(LinearLayout content, Settings.StringSetting setting) {

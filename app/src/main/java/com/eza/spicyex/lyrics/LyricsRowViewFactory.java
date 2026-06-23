@@ -257,7 +257,7 @@ public final class LyricsRowViewFactory {
     }
 
     private boolean isJapaneseLine(AppliedLine line) {
-        return hasJapaneseReading(line) || (line != null && SpicyJapaneseChineseProcessor.canRomanizeJapanese(line.text));
+        return hasJapaneseReading(line) || (line != null && SpicyTextDetection.hasKana(line.text));
     }
 
     private boolean hasJapaneseReading(AppliedLine line) {

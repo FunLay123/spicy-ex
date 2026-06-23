@@ -1,9 +1,5 @@
 package com.eza.spicyex.lyrics;
 
-import com.github.pemistahl.lingua.api.Language;
-import com.github.pemistahl.lingua.api.LanguageDetector;
-import com.github.pemistahl.lingua.api.LanguageDetectorBuilder;
-
 import java.util.Locale;
 import static com.eza.spicyex.lyrics.LyricUtils.isBlank;
 import static com.eza.spicyex.lyrics.LyricUtils.safe;
@@ -14,35 +10,6 @@ import static com.eza.spicyex.lyrics.LyricUtils.safe;
  */
 public final class SpicyProcessing {
     public static final int PROCESSING_VERSION = 8;
-
-    private static final LanguageDetector LATIN_DETECTOR = LanguageDetectorBuilder.fromLanguages(
-            Language.ENGLISH,
-            Language.SPANISH,
-            Language.FRENCH,
-            Language.GERMAN,
-            Language.ITALIAN,
-            Language.PORTUGUESE,
-            Language.DUTCH,
-            Language.POLISH,
-            Language.SWEDISH,
-            Language.DANISH,
-            Language.BOKMAL,
-            Language.FINNISH,
-            Language.TURKISH,
-            Language.INDONESIAN,
-            Language.MALAY,
-            Language.VIETNAMESE,
-            Language.RUSSIAN,
-            Language.UKRAINIAN,
-            Language.BULGARIAN,
-            Language.SERBIAN,
-            Language.MACEDONIAN,
-            Language.BELARUSIAN,
-            Language.GREEK,
-            Language.JAPANESE,
-            Language.KOREAN,
-            Language.CHINESE
-    ).build();
 
     private SpicyProcessing() {
     }
@@ -114,13 +81,7 @@ public final class SpicyProcessing {
         if (!isLatinTarget(targetLang)) return false;
         String compact = text.replaceAll("[^\\p{L}\\s']", " ").replaceAll("\\s+", " ").trim();
         if (compact.length() < 24) return false;
-        try {
-            Language detected = LATIN_DETECTOR.detectLanguageOf(compact);
-            String detectedIso2 = detected.getIsoCode639_1().toString().toLowerCase(Locale.ROOT);
-            return !detectedIso2.equalsIgnoreCase(targetLang);
-        } catch (Throwable ignored) {
-            return false;
-        }
+        return LatinLanguageGate.lineLooksNonTargetLatin(compact, targetLang);
     }
 
     private static boolean isLatinTarget(String targetLang) {

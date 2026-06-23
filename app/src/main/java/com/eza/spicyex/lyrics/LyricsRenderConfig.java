@@ -2,6 +2,7 @@ package com.eza.spicyex.lyrics;
 
 import android.content.Context;
 
+import com.eza.spicyex.FeatureAvailability;
 import com.eza.spicyex.Settings;
 import com.eza.spicyex.SpotifyPlusConfig;
 
@@ -134,14 +135,16 @@ public final class LyricsRenderConfig {
         if (cfg == null && context != null) cfg = SpotifyPlusConfig.from(context);
         LyricsShellSettings shell = new LyricsShellSettings(context, cfg);
 
-        String jp = get(cfg, Settings.JAPANESE_READING_MODE);
-        String cn = get(cfg, Settings.CHINESE_MODE);
+        boolean transliterationAvailable = FeatureAvailability.transliterationAvailable();
+        boolean translationAvailable = FeatureAvailability.translationAvailable();
+        String jp = transliterationAvailable ? get(cfg, Settings.JAPANESE_READING_MODE) : "off";
+        String cn = transliterationAvailable ? get(cfg, Settings.CHINESE_MODE) : "off";
         String defaultJp = "cycle".equals(jp) ? SpotifyPlusConfig.JP_READING_FURIGANA_ROMAJI : jp;
         String defaultCn = "off".equals(cn) ? "" : LyricsShellSettings.normalizeChineseMode(
                 "cycle".equals(cn) ? SpotifyPlusConfig.CHINESE_MODE_PINYIN : cn);
-        String kr = get(cfg, Settings.KOREAN_ROMANIZATION);
+        String kr = transliterationAvailable ? get(cfg, Settings.KOREAN_ROMANIZATION) : "Off";
         String defaultKr = "cycle".equals(kr) ? "Letter-by-letter" : kr;
-        String cy = get(cfg, Settings.CYRILLIC_MODE);
+        String cy = transliterationAvailable ? get(cfg, Settings.CYRILLIC_MODE) : "Off";
         String defaultCy = "cycle".equals(cy) ? SpicyRomanizer.CYRILLIC_RUSSIAN : cy;
 
         return new LyricsRenderConfig(
@@ -154,8 +157,8 @@ public final class LyricsRenderConfig {
                 shell.lineBlurQualityMultiplier(),
                 "note".equals(get(cfg, Settings.INTERLUDE_ICON)),
                 get(cfg, Settings.TOGGLE_PROGRESS_RING),
-                shell.attachTransliterationToWordsEnabled(),
-                get(cfg, Settings.TRANSLITERATION_ENABLED),
+                transliterationAvailable && shell.attachTransliterationToWordsEnabled(),
+                transliterationAvailable && get(cfg, Settings.TRANSLITERATION_ENABLED),
                 shell.lineSpacingMode(),
                 shell.lineSpacingMultiplier(),
                 shell.lyricWeight(),
@@ -165,7 +168,7 @@ public final class LyricsRenderConfig {
                 shell.lyricsTextSizeMultiplier(),
                 shell.liveCardTextSizeMode(),
                 shell.liveCardTextSizeMultiplier(),
-                shell.liveCardShowTransliteration(),
+                transliterationAvailable && shell.liveCardShowTransliteration(),
                 "Minimal".equals(get(cfg, Settings.LIVE_CARD_ANIMATION)),
                 shell.lineSyncFillMode(),
                 jp,
@@ -175,12 +178,12 @@ public final class LyricsRenderConfig {
                 kr,
                 defaultKr,
                 defaultKr,
-                get(cfg, Settings.CHINESE_TONES),
+                transliterationAvailable && get(cfg, Settings.CHINESE_TONES),
                 cy,
                 defaultCy,
                 defaultCy,
                 get(cfg, Settings.CYRILLIC_KEEP_SIGNS),
-                translationEnabled(cfg),
+                translationAvailable && translationEnabled(cfg),
                 get(cfg, Settings.TRANSLATION_TARGET),
                 "Bright".equals(get(cfg, Settings.TRANSLATION_BRIGHTNESS)),
                 get(cfg, Settings.SYNC_OFFSET_MS)

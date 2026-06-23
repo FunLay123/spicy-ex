@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import com.eza.spicyex.BuildStamp;
 import com.eza.spicyex.Settings;
 import com.eza.spicyex.beautifullyrics.entities.LyricsResponseCache;
-import com.eza.spicyex.beautifullyrics.entities.LyricsTranslator;
 import com.eza.spicyex.lyrics.LyricCaches;
 
 import de.robv.android.xposed.XposedBridge;
@@ -27,7 +26,6 @@ final class DeployCacheCleaner {
             String lastVersion = prefs.getString(Settings.LAST_CACHE_CLEAR_VERSION.key, "");
             if (currentVersion.equals(lastVersion)) return;
             LyricsResponseCache.clear(context);
-            LyricsTranslator.clearCache(context);
             LyricCaches.clearGoogle(context);
             LyricCaches.clearProcessed(context);
             prefs.edit().putString(Settings.LAST_CACHE_CLEAR_VERSION.key, currentVersion).apply();
