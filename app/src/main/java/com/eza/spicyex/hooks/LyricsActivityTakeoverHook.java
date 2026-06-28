@@ -174,56 +174,55 @@ final class LyricsActivityTakeoverHook {
         }
     }
 
-    private void injectExtraLyricsButton(Activity activity, int currentIteration) {
-        try {
-            if (activity == null || activity.isFinishing()
-                    || isLyricsFullscreenActivity(activity)
-                    || !isNativeSpicyEnabled(activity)) return;
-            FrameLayout content = activity.findViewById(android.R.id.content);
-            if (content == null || content.findViewWithTag(TAG_EXTRA_LYRICS_BUTTON) != null) return;
-            if (!isLikelyNowPlayingScreen(activity, content)) return;
+   private void injectExtraLyricsButton(Activity activity, int currentIteration) {
+    try {
+        if (activity == null || activity.isFinishing()
+                || isLyricsFullscreenActivity(activity)
+                || !isNativeSpicyEnabled(activity)) return;
+        FrameLayout content = activity.findViewById(android.R.id.content);
+        if (content == null) return;
+        if (!isLikelyNowPlayingScreen(activity, content)) return;
 
-            // The Share/Queue cluster (accessory_row) is an R8-obfuscated ConstraintLayout. Add the
-            // entry button to its parent and position it into the empty footer space after layout.
-            View rowView = findViewByResourceEntryName(content, "accessory_row");
-            View connectDeviceNameView = findViewByResourceEntryName(content, "connect_device_name");
-            if (rowView == null || !rowView.isShown() || rowView.getWidth() == 0) {
-                XposedBridge.log(NativeSpicyLyricsHook.TAG
-                        + " Extra lyrics: accessory_row not laid out yet in " + activity.getClass().getName());
-                return;
-            }
-            boolean hasLabel = connectDeviceNameView != null
-                    && connectDeviceNameView.isShown()
-                    && connectDeviceNameView.getWidth() > 0;
-            if (!hasLabel && currentIteration < 3) {
-                XposedBridge.log(NativeSpicyLyricsHook.TAG
-                        + " Extra lyrics: connect_device_name not ready, waiting for retry " + activity.getClass().getName());
-                return;        
-            }
-            ViewGroup buttonHost = rowView.getParent() instanceof ViewGroup ? (ViewGroup) rowView.getParent() : null;
-            if (buttonHost == null || buttonHost.findViewWithTag(TAG_EXTRA_LYRICS_BUTTON) != null) return;
-            int side = rowView.getHeight() > 0 ? rowView.getHeight() : dp(48);  
-            View button = createExtraLyricsRowButton(activity);
-            buttonHost.addView(button, new ViewGroup.LayoutParams(side, side));
-
-            if (hasLabel) {
-                int[] connectDeviceNameLocation = new int[2];
-                int[] buttonHostLocation = new int[2];
-                connectDeviceNameView.getLocationInWindow(connectDeviceNameLocation);
-                buttonHost.getLocationInWindow(buttonHostLocation);
-                if (connectDeviceNameLocation[0] + connectDeviceNameView.getWidth() > buttonHostLocation[0] + (buttonHost.getWidth() - side) / 2) {
-                    button.setTranslationX(connectDeviceNameLocation[0] + connectDeviceNameView.getWidth() + dp(8) - buttonHostLocation[0]);    
-                } else {
-                    button.setTranslationX((buttonHost.getWidth() - side) / 2f);
-                }
-            }
-            button.setTranslationY(rowView.getTop() + (rowView.getHeight() - side) / 2f);
+        // Anchor: the Share/Queue cluster (accessory_row). Retries wait until it is laid out.
+        View rowView = findViewByResourceEntryName(content, "accessory_row");
+        if (rowView == null || !rowView.isShown() || rowView.getWidth() == 0) {
             XposedBridge.log(NativeSpicyLyricsHook.TAG
-                    + " inserted Extra lyrics ♪ centered in footer in " + activity.getClass().getName());
-        } catch (Throwable t) {
-            XposedBridge.log(NativeSpicyLyricsHook.TAG + " inject extra lyrics button failed: " + t);
+                    + " Extra lyrics: accessory_row not laid out yet in " + activity.getClass().getName());
+            return;
         }
+        ViewGroup buttonHost = rowView.getParent() instanceof ViewGroup ? (ViewGroup) rowView.getParent() : null;
+        if (buttonHost == null || buttonHost.getWidth() == 0) return;
+        int side = rowView.getHeight() > 0 ? rowView.getHeight() : dp(48);
+
+        // Get-or-create: add the button (centered) on the first pass, reuse it afterwards.
+        View button = buttonHost.findViewWithTag(TAG_EXTRA_LYRICS_BUTTON);
+        if (button == null) {
+            button = createExtraLyricsRowButton(activity);
+            buttonHost.addView(button, new ViewGroup.LayoutParams(side, side));
+            button.setTranslationX((buttonHost.getWidth() - side) / 2f);
+            button.setTranslationY(rowView.getTop() + (rowView.getHeight() - side) / 2f);
+        }
+
+        // Reposition: if the device label is present, move the button to the right of it.
+        View connectDeviceNameView = findViewByResourceEntryName(content, "connect_device_name");
+        boolean hasLabel = connectDeviceNameView != null
+                && connectDeviceNameView.isShown()
+                && connectDeviceNameView.getWidth() > 0;
+        if (hasLabel) {
+            int[] connectDeviceNameLocation = new int[2];
+            int[] buttonHostLocation = new int[2];
+            connectDeviceNameView.getLocationInWindow(connectDeviceNameLocation);
+            buttonHost.getLocationInWindow(buttonHostLocation);
+            if (connectDeviceNameLocation[0] + connectDeviceNameView.getWidth() > buttonHostLocation[0] + (buttonHost.getWidth() - side) / 2) {
+                button.setTranslationX(connectDeviceNameLocation[0] + connectDeviceNameView.getWidth() + dp(8) - buttonHostLocation[0]);
+            } else {
+                button.setTranslationX((buttonHost.getWidth() - side) / 2f);
+            }
+        }
+    } catch (Throwable t) {
+        XposedBridge.log(NativeSpicyLyricsHook.TAG + " inject extra lyrics button failed: " + t);
     }
+}
 
     private View createExtraLyricsRowButton(Activity activity) {
         ImageButton button = new ImageButton(activity);
