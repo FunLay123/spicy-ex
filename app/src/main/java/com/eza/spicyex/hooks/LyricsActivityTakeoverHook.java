@@ -164,17 +164,17 @@ final class LyricsActivityTakeoverHook {
             if (!isNativeSpicyEnabled(activity)) return;
             View decor = activity.getWindow() == null ? null : activity.getWindow().getDecorView();
             if (decor == null) return;
-            decor.postDelayed(() -> injectExtraLyricsButton(activity), 450);
-            decor.postDelayed(() -> injectExtraLyricsButton(activity), 1400);
-            decor.postDelayed(() -> injectExtraLyricsButton(activity), 2800);
-            decor.postDelayed(() -> injectExtraLyricsButton(activity), 5200);
+            decor.postDelayed(() -> injectExtraLyricsButton(activity, 0), 450);
+            decor.postDelayed(() -> injectExtraLyricsButton(activity, 1), 1400);
+            decor.postDelayed(() -> injectExtraLyricsButton(activity, 2), 2800);
+            decor.postDelayed(() -> injectExtraLyricsButton(activity, 3), 5200);
             nowPlayingInjector.schedule(activity);
         } catch (Throwable t) {
             XposedBridge.log(NativeSpicyLyricsHook.TAG + " schedule extra lyrics injection failed: " + t);
         }
     }
 
-    private void injectExtraLyricsButton(Activity activity) {
+    private void injectExtraLyricsButton(Activity activity, int currentIteration) {
         try {
             if (activity == null || activity.isFinishing()
                     || isLyricsFullscreenActivity(activity)
@@ -186,17 +186,37 @@ final class LyricsActivityTakeoverHook {
             // The Share/Queue cluster (accessory_row) is an R8-obfuscated ConstraintLayout. Add the
             // entry button to its parent and position it into the empty footer space after layout.
             View rowView = findViewByResourceEntryName(content, "accessory_row");
+            View connectDeviceNameView = findViewByResourceEntryName(content, "connect_device_name");
             if (rowView == null || !rowView.isShown() || rowView.getWidth() == 0) {
                 XposedBridge.log(NativeSpicyLyricsHook.TAG
                         + " Extra lyrics: accessory_row not laid out yet in " + activity.getClass().getName());
                 return;
             }
+            boolean hasLabel = connectDeviceNameView != null
+                    && connectDeviceNameView.isShown()
+                    && connectDeviceNameView.getWidth() > 0;
+            if (!hasLabel && currentIteration < 3) {
+                XposedBridge.log(NativeSpicyLyricsHook.TAG
+                        + " Extra lyrics: connect_device_name not ready, waiting for retry " + activity.getClass().getName());
+                return;        
+            }
             ViewGroup buttonHost = rowView.getParent() instanceof ViewGroup ? (ViewGroup) rowView.getParent() : null;
             if (buttonHost == null || buttonHost.findViewWithTag(TAG_EXTRA_LYRICS_BUTTON) != null) return;
-            int side = rowView.getHeight() > 0 ? rowView.getHeight() : dp(48);
+            int side = rowView.getHeight() > 0 ? rowView.getHeight() : dp(48);  
             View button = createExtraLyricsRowButton(activity);
             buttonHost.addView(button, new ViewGroup.LayoutParams(side, side));
-            button.setTranslationX((buttonHost.getWidth() - side) / 2f);
+
+            if (hasLabel) {
+                int[] connectDeviceNameLocation = new int[2];
+                int[] buttonHostLocation = new int[2];
+                connectDeviceNameView.getLocationInWindow(connectDeviceNameLocation);
+                buttonHost.getLocationInWindow(buttonHostLocation);
+                if (connectDeviceNameLocation[0] + connectDeviceNameView.getWidth() > buttonHostLocation[0] + (buttonHost.getWidth() - side) / 2) {
+                    button.setTranslationX(connectDeviceNameLocation[0] + connectDeviceNameView.getWidth() + dp(8) - buttonHostLocation[0]);    
+                } else {
+                    button.setTranslationX((buttonHost.getWidth() - side) / 2f);
+                }
+            }
             button.setTranslationY(rowView.getTop() + (rowView.getHeight() - side) / 2f);
             XposedBridge.log(NativeSpicyLyricsHook.TAG
                     + " inserted Extra lyrics ♪ centered in footer in " + activity.getClass().getName());
