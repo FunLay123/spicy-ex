@@ -208,6 +208,15 @@ final class LyricsActivityTakeoverHook {
         boolean hasLabel = connectDeviceNameView != null
                 && connectDeviceNameView.isShown()
                 && connectDeviceNameView.getWidth() > 0;
+        XposedBridge.log(NativeSpicyLyricsHook.TAG
+                + " ExtraLyrics DIAG iter=" + currentIteration
+                + " found=" + (connectDeviceNameView != null)
+                + " hasLabel=" + hasLabel
+                + " labelW=" + (connectDeviceNameView != null ? connectDeviceNameView.getWidth() : -1)
+                + " shown=" + (connectDeviceNameView != null && connectDeviceNameView.isShown())
+                + " hostW=" + buttonHost.getWidth()
+                + " side=" + side);
+        
         if (hasLabel) {
             int[] connectDeviceNameLocation = new int[2];
             int[] buttonHostLocation = new int[2];
