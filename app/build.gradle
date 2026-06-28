@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace 'com.eza.spicyexx'
+    namespace 'com.eza.spicyex'
     compileSdk 35
 
     def keystorePath = System.getenv("SIGNING_KEYSTORE_FILE")
@@ -24,7 +24,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.eza.spicyexx"
+        applicationId "com.eza.spicyex"
         minSdk 27
         targetSdk 35
         versionCode 265
