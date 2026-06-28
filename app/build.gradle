@@ -7,7 +7,7 @@ android {
     compileSdk 35
 
     def keystorePath = System.getenv("SIGNING_KEYSTORE_FILE")
-    def storePassword = System.getenv("SIGNING_STORE_PASSWORD")
+    def storePass = System.getenv("SIGNING_STORE_PASSWORD")
     // Validate the release keystore up front. CI decodes it from a secret; a corrupt/missing secret
     // makes it fail to load ("Tag number over 30 is not supported"), which hard-fails packageRelease.
     // Fall back to debug signing so assembleRelease still produces an installable APK (CI stays green)
@@ -16,7 +16,7 @@ android {
     if (keystorePath != null && new File(keystorePath).exists()) {
         try {
             def ks = java.security.KeyStore.getInstance("JKS")
-            new File(keystorePath).withInputStream { ks.load(it, (storePassword ?: "").toCharArray()) }
+            new File(keystorePath).withInputStream { ks.load(it, (storePass ?: "").toCharArray()) }
             releaseKeystoreValid = true
         } catch (Throwable t) {
             logger.warn("SpicyEX: release keystore unusable (" + t.message + "); release build falls back to debug signing.")
@@ -56,7 +56,7 @@ android {
         release {
             if (releaseKeystoreValid) {
                 storeFile file(keystorePath)
-                storePassword storePassword
+                storePassword storePass
                 keyAlias System.getenv("SIGNING_KEY_ALIAS")
                 keyPassword System.getenv("SIGNING_KEY_PASSWORD")
             }
