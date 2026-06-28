@@ -206,7 +206,6 @@ final class LyricsActivityTakeoverHook {
         // Reposition: if the device label is present, move the button to the right of it.
         View connectDeviceNameView = findViewByResourceEntryName(content, "connect_device_name");
         boolean hasLabel = connectDeviceNameView != null
-                && connectDeviceNameView.isShown()
                 && connectDeviceNameView.getWidth() > 0;
         XposedBridge.log(NativeSpicyLyricsHook.TAG
                 + " ExtraLyrics DIAG iter=" + currentIteration
